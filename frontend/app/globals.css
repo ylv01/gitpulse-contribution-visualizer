@@ -114,11 +114,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: linear-gradient(90deg, transparent, rgba(40, 215, 255, 0.34), transparent);
 }
 
-.signal-dot-cyan {
-  animation: signal-breathe 3.6s ease-in-out infinite;
-  will-change: opacity, transform, box-shadow;
-}
-
 .signal-radar {
   isolation: isolate;
 }
@@ -157,19 +152,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   to { background-position: -200% 0; }
 }
 
-@keyframes signal-breathe {
-  0%, 100% {
-    opacity: 0.42;
-    transform: scale(0.82);
-    box-shadow: 0 0 5px rgba(40, 215, 255, 0.65);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.16);
-    box-shadow: 0 0 18px rgba(40, 215, 255, 1), 0 0 34px rgba(40, 215, 255, 0.32);
-  }
-}
-
 @keyframes signal-flow {
   to { stroke-dashoffset: -128; }
 }
@@ -184,10 +166,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .signal-dot-cyan,
   .signal-trace,
   .radar-orbit,
   .hero-sheen {
     animation: none;
+  }
+
+  .animated-signal-dot animate {
+    display: none;
   }
 }

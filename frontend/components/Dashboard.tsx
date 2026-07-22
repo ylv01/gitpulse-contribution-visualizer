@@ -32,6 +32,7 @@ import ActivityChart from "./charts/ActivityChart";
 import HeatmapChart from "./charts/HeatmapChart";
 import TrendChart from "./charts/TrendChart";
 import MetricCard from "./MetricCard";
+import SignalDot from "./SignalDot";
 
 function formatDate(date: Date): string {
   const offset = date.getTimezoneOffset();
@@ -382,7 +383,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="hidden items-center gap-2 sm:flex">
-                  <span className="signal-dot-cyan h-1.5 w-1.5 rounded-full bg-cyan" />
+                  <SignalDot size={18} className="-m-1" />
                   <span className="tech-label text-[7px] text-slate-700">SVG RENDER PIPELINE</span>
                 </div>
               </div>
@@ -420,7 +421,7 @@ function SignalRadar() {
         <p className="mt-1 text-[9px] text-slate-700">Live activity topology</p>
       </div>
       <div className="absolute right-5 top-5 flex items-center gap-1.5">
-        <span className="signal-dot-cyan h-1.5 w-1.5 rounded-full bg-cyan" />
+        <SignalDot size={18} className="-m-1" />
         <span className="tech-label text-[7px] text-cyan/50">SCANNING</span>
       </div>
 

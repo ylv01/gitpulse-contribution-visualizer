@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import SignalDot from "../SignalDot";
+
 interface ChartFrameProps {
   eyebrow: string;
   title: string;
@@ -27,14 +29,11 @@ export default function ChartFrame({
           <h2 className="text-base font-semibold tracking-tight text-slate-100 sm:text-lg">{title}</h2>
           <p className="mt-1 text-xs leading-relaxed text-slate-500">{description}</p>
         </div>
-        <span
-          aria-hidden="true"
-          className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-            accent === "cyan"
-              ? "signal-dot-cyan bg-cyan"
-              : "bg-violet-500 shadow-[0_0_12px_#8b5cf6]"
-          }`}
-        />
+        {accent === "cyan" ? (
+          <SignalDot className="-mr-1 -mt-1 shrink-0" />
+        ) : (
+          <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-violet-500 shadow-[0_0_12px_#8b5cf6]" />
+        )}
       </div>
       {children}
     </section>
