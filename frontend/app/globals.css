@@ -133,6 +133,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   animation: signal-flow 9s linear infinite;
 }
 
+.trend-flow-chart svg path[stroke="#d5fbff"] {
+  stroke-dasharray: 5 11 24 17;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 2px rgba(170, 246, 255, 0.9));
+  animation: trend-line-flow 2.9s linear infinite;
+}
+
 .radar-orbit {
   transform-origin: center;
   animation: radar-rotate 24s linear infinite;
@@ -156,6 +163,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   to { stroke-dashoffset: -128; }
 }
 
+@keyframes trend-line-flow {
+  to { stroke-dashoffset: -57; }
+}
+
 @keyframes radar-rotate {
   to { transform: rotate(360deg); }
 }
@@ -167,6 +178,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @media (prefers-reduced-motion: reduce) {
   .signal-trace,
+  .trend-flow-chart svg path[stroke="#d5fbff"],
   .radar-orbit,
   .hero-sheen {
     animation: none;

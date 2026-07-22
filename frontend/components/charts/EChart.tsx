@@ -10,11 +10,13 @@ const ReactECharts = dynamic(() => import("echarts-for-react"), {
 interface EChartProps {
   option: object;
   height?: number;
+  className?: string;
 }
 
-export default function EChart({ option, height = 320 }: EChartProps) {
+export default function EChart({ option, height = 320, className = "" }: EChartProps) {
   return (
     <ReactECharts
+      className={className}
       option={option}
       notMerge
       lazyUpdate

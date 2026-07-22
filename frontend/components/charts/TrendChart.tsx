@@ -44,7 +44,23 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
         smooth: 0.28,
         showSymbol: data.length < 45,
         symbolSize: 5,
-        lineStyle: { width: 2.5, color: "#31cfff", shadowBlur: 12, shadowColor: "rgba(49,207,255,.42)" },
+        lineStyle: {
+          width: 2.5,
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 1,
+            y2: 0,
+            colorStops: [
+              { offset: 0, color: "#25d9ff" },
+              { offset: 0.55, color: "#58c8ff" },
+              { offset: 1, color: "#9b7cff" },
+            ],
+          },
+          shadowBlur: 12,
+          shadowColor: "rgba(49,207,255,.38)",
+        },
         itemStyle: { color: "#77e7ff", borderColor: "#07101e", borderWidth: 2 },
         areaStyle: {
           color: {
@@ -62,36 +78,27 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
         },
         emphasis: { focus: "series" },
       },
-      ...(data.length > 1
-        ? [
-            {
-              name: "Time flow",
-              type: "lines" as const,
-              coordinateSystem: "cartesian2d" as const,
-              polyline: true,
-              silent: true,
-              z: 12,
-              effect: {
-                show: true,
-                loop: true,
-                constantSpeed: 22,
-                trailLength: 0.32,
-                symbol: "circle",
-                symbolSize: 6,
-                color: "#d8f9ff",
-              },
-              lineStyle: {
-                width: 0,
-                opacity: 0,
-              },
-              data: [
-                {
-                  coords: data.map((item, index) => [index, item.count]),
-                },
-              ],
-            },
-          ]
-        : []),
+      {
+        id: "trend-flow-highlight",
+        name: "Flow highlight",
+        type: "line",
+        data: data.map((item) => item.count),
+        smooth: 0.28,
+        showSymbol: false,
+        silent: true,
+        z: 12,
+        animation: false,
+        lineStyle: {
+          width: 2.2,
+          color: "#d5fbff",
+          type: [5, 11, 24, 17],
+          cap: "round",
+          opacity: 0.84,
+          shadowBlur: 7,
+          shadowColor: "rgba(117, 235, 255, .72)",
+        },
+        emphasis: { disabled: true },
+      },
     ],
   };
 
@@ -99,10 +106,10 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
     <ChartFrame
       eyebrow="Signal / 01"
       title="贡献趋势"
-      description="选定时间窗内的贡献强度变化 · 光点沿时间方向持续流动"
+      description="选定时间窗内的贡献强度变化 · 霓虹光泽沿时间方向持续流动"
       className="lg:col-span-2"
     >
-      <EChart option={option} height={300} />
+      <EChart className="trend-flow-chart" option={option} height={300} />
     </ChartFrame>
   );
 }
