@@ -70,7 +70,7 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
       accent="violet"
     >
       {total > 0 ? (
-        <EChart option={option} height={300} />
+        <EChart className="export-activity-chart" option={option} height={300} />
       ) : (
         <div className="flex h-[300px] items-center justify-center text-sm text-slate-600">该时间段暂无分类活动</div>
       )}

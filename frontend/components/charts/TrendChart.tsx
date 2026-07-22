@@ -109,7 +109,7 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
       description="选定时间窗内的贡献强度变化 · 霓虹光泽沿时间方向持续流动"
       className="lg:col-span-2"
     >
-      <EChart className="trend-flow-chart" option={option} height={300} />
+      <EChart className="trend-flow-chart export-trend-chart" option={option} height={300} />
     </ChartFrame>
   );
 }

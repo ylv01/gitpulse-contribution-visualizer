@@ -88,10 +88,9 @@ export default function HeatmapChart({ data }: { data: ContributionDay[] }) {
     >
       <div className="overflow-x-auto">
         <div className="min-w-[780px]">
-          <EChart option={option} height={chartHeight} />
+          <EChart className="export-heatmap-chart" option={option} height={chartHeight} />
         </div>
       </div>
     </ChartFrame>
   );
 }
-
