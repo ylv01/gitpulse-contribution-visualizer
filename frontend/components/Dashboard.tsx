@@ -371,7 +371,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div id="visual-report" className="rounded-3xl bg-[#050714] p-1">
+            <div className="rounded-3xl bg-[#050714] p-1">
               <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/[0.055] bg-gradient-to-r from-cyan/[0.045] via-transparent to-violet-500/[0.045] px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="grid h-8 w-8 place-items-center rounded-lg border border-cyan/20 bg-cyan/[0.07] text-cyan">
@@ -393,7 +393,9 @@ export default function Dashboard() {
                 <MetricCard label="Longest streak" value={`${data.meta.longest_streak}d`} note="consecutive active days" icon={Activity} accent="violet" />
                 <MetricCard label="Collaboration" value={(data.activity.pull_requests + data.activity.issues + data.activity.code_reviews).toLocaleString()} note="PR · issue · review events" icon={Users} accent="cyan" />
               </div>
+            </div>
 
+            <div id="visual-report" className="mt-4 rounded-3xl bg-[#050714] p-1">
               <div className="grid gap-4 lg:grid-cols-3">
                 <TrendChart data={data.trend} />
                 <ActivityChart activity={data.activity} />

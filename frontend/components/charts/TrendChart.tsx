@@ -62,6 +62,36 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
         },
         emphasis: { focus: "series" },
       },
+      ...(data.length > 1
+        ? [
+            {
+              name: "Time flow",
+              type: "lines" as const,
+              coordinateSystem: "cartesian2d" as const,
+              polyline: true,
+              silent: true,
+              z: 12,
+              effect: {
+                show: true,
+                loop: true,
+                constantSpeed: 22,
+                trailLength: 0.32,
+                symbol: "circle",
+                symbolSize: 6,
+                color: "#d8f9ff",
+              },
+              lineStyle: {
+                width: 0,
+                opacity: 0,
+              },
+              data: [
+                {
+                  coords: data.map((item, index) => [index, item.count]),
+                },
+              ],
+            },
+          ]
+        : []),
     ],
   };
 
@@ -69,11 +99,10 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
     <ChartFrame
       eyebrow="Signal / 01"
       title="贡献趋势"
-      description="选定时间窗内的贡献强度变化"
+      description="选定时间窗内的贡献强度变化 · 光点沿时间方向持续流动"
       className="lg:col-span-2"
     >
       <EChart option={option} height={300} />
     </ChartFrame>
   );
 }
-
