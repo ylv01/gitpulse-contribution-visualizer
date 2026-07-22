@@ -1,4 +1,4 @@
-![GitPulse 演示图片](./demo.png)
+![GitPulse 演示图片](ylv01-contribution-report.svg)
 可根据 GitHub 账号与日期范围，按日、周、月展示 Push 数量，并支持将可视化结果保存为图片。
 
 # GitPulse · GitHub Contribution Visualizer
