@@ -44,6 +44,21 @@ body::before {
   mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
 }
 
+body::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  opacity: 0.13;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 3px,
+    rgba(107, 145, 255, 0.08) 4px
+  );
+}
+
 ::selection {
   color: white;
   background: rgba(80, 100, 255, 0.65);
@@ -99,6 +114,39 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: linear-gradient(90deg, transparent, rgba(40, 215, 255, 0.34), transparent);
 }
 
+.signal-dot-cyan {
+  animation: signal-breathe 3.6s ease-in-out infinite;
+  will-change: opacity, transform, box-shadow;
+}
+
+.signal-radar {
+  isolation: isolate;
+}
+
+.signal-radar::before {
+  position: absolute;
+  inset: 13%;
+  z-index: -1;
+  content: "";
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(40, 215, 255, 0.12), rgba(74, 72, 255, 0.035) 48%, transparent 70%);
+  filter: blur(8px);
+}
+
+.signal-trace {
+  stroke-dasharray: 6 10;
+  animation: signal-flow 9s linear infinite;
+}
+
+.radar-orbit {
+  transform-origin: center;
+  animation: radar-rotate 24s linear infinite;
+}
+
+.hero-sheen {
+  animation: hero-sheen 8s ease-in-out infinite;
+}
+
 .skeleton-shimmer {
   background: linear-gradient(90deg, rgba(255,255,255,.025), rgba(74,128,255,.09), rgba(255,255,255,.025));
   background-size: 200% 100%;
@@ -109,3 +157,37 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   to { background-position: -200% 0; }
 }
 
+@keyframes signal-breathe {
+  0%, 100% {
+    opacity: 0.42;
+    transform: scale(0.82);
+    box-shadow: 0 0 5px rgba(40, 215, 255, 0.65);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.16);
+    box-shadow: 0 0 18px rgba(40, 215, 255, 1), 0 0 34px rgba(40, 215, 255, 0.32);
+  }
+}
+
+@keyframes signal-flow {
+  to { stroke-dashoffset: -128; }
+}
+
+@keyframes radar-rotate {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hero-sheen {
+  0%, 100% { opacity: 0.35; transform: translateX(-15%); }
+  50% { opacity: 0.8; transform: translateX(15%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-dot-cyan,
+  .signal-trace,
+  .radar-orbit,
+  .hero-sheen {
+    animation: none;
+  }
+}

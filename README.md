@@ -14,7 +14,7 @@
 - GitHub 风格日历热力图，支持跨年展示
 - commits / pull requests / issues / code reviews 活动类型分布
 - 总贡献、活跃天数、最长连续贡献等关键指标
-- 一键导出完整可视化报告 PNG
+- 一键导出完整可视化报告 SVG（矢量）或 PNG
 - 一键导出日数据、聚合趋势和活动分布 CSV
 - 对超过一年的范围自动分片请求 GitHub API 并合并数据
 - 深色科技风、蓝紫霓虹、响应式 Dashboard

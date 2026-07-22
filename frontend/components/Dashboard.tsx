@@ -11,6 +11,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  FileCode2,
   FileSpreadsheet,
   Github,
   KeyRound,
@@ -25,7 +26,7 @@ import {
 import { FormEvent, useMemo, useState } from "react";
 
 import { fetchContributions } from "@/lib/api";
-import { exportCsv, exportReportPng } from "@/lib/export";
+import { exportCsv, exportReportPng, exportReportSvg } from "@/lib/export";
 import type { Aggregation, ContributionResponse } from "@/lib/types";
 import ActivityChart from "./charts/ActivityChart";
 import HeatmapChart from "./charts/HeatmapChart";
@@ -61,7 +62,7 @@ export default function Dashboard() {
   const [aggregation, setAggregation] = useState<Aggregation>("week");
   const [data, setData] = useState<ContributionResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<"svg" | "png" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -90,13 +91,25 @@ export default function Dashboard() {
 
   async function handlePngExport() {
     if (!data) return;
-    setExporting(true);
+    setExporting("png");
     try {
       await exportReportPng("visual-report", `${data.user.login}-contribution-report.png`);
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : "PNG 导出失败");
     } finally {
-      setExporting(false);
+      setExporting(null);
+    }
+  }
+
+  async function handleSvgExport() {
+    if (!data) return;
+    setExporting("svg");
+    try {
+      await exportReportSvg("visual-report", `${data.user.login}-contribution-report.svg`);
+    } catch (exportError) {
+      setError(exportError instanceof Error ? exportError.message : "SVG 导出失败");
+    } finally {
+      setExporting(null);
     }
   }
 
@@ -129,7 +142,7 @@ export default function Dashboard() {
               <span className="tech-label text-[8px] font-bold text-emerald-300/70">GRAPHQL READY</span>
             </div>
             <a
-              href="https://github.com"
+              href="https://github.com/ylv01/gitpulse-contribution-visualizer"
               target="_blank"
               rel="noreferrer"
               className="grid h-9 w-9 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-slate-500 transition hover:border-white/[0.15] hover:text-white"
@@ -142,27 +155,37 @@ export default function Dashboard() {
       </header>
 
       <div className="mx-auto max-w-[1500px] px-5 pb-16 pt-8 sm:px-8 lg:px-10 lg:pt-10">
-        <section className="mb-7 grid items-end gap-5 md:grid-cols-[1fr_auto]">
-          <div>
-            <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan/75">
-              <Sparkles size={12} />
-              Developer analytics console
-            </div>
-            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-[-0.035em] text-white sm:text-4xl lg:text-[44px]">
-              把每一次贡献，转化为
-              <span className="bg-gradient-to-r from-cyan via-blue-400 to-violet-400 bg-clip-text text-transparent"> 可见的影响力</span>
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-              聚合 GitHub 活动数据，观察贡献节奏、持续性与协作画像。
-            </p>
-          </div>
-          <div className="hidden grid-cols-3 divide-x divide-white/[0.07] rounded-2xl border border-white/[0.06] bg-white/[0.025] px-2 py-3 lg:grid">
-            {[["API", "GraphQL"], ["ENGINE", "pandas"], ["RENDER", "ECharts"]].map(([label, value]) => (
-              <div className="px-5" key={label}>
-                <p className="tech-label text-[8px] text-slate-700">{label}</p>
-                <p className="mt-1 text-[11px] font-medium text-slate-400">{value}</p>
+        <section className="relative mb-7 overflow-hidden rounded-[28px] border border-white/[0.07] bg-[#080c1d]/65 px-6 py-8 shadow-[0_28px_90px_rgba(0,0,0,.24)] backdrop-blur-xl sm:px-8 lg:px-10 lg:py-9">
+          <div className="hero-sheen pointer-events-none absolute -top-px left-[15%] h-px w-[55%] bg-gradient-to-r from-transparent via-cyan/80 to-transparent" />
+          <div className="pointer-events-none absolute -left-28 top-1/2 h-60 w-60 -translate-y-1/2 rounded-full bg-blue-600/[0.08] blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-violet-600/[0.11] blur-3xl" />
+
+          <div className="relative grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div>
+              <div className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan/80">
+                <Sparkles size={12} />
+                Developer intelligence terminal
               </div>
-            ))}
+              <h1 className="max-w-3xl text-3xl font-bold leading-[1.12] tracking-[-0.045em] text-white sm:text-4xl lg:text-[48px]">
+                把每一次贡献，转化为
+                <span className="block bg-gradient-to-r from-cyan via-blue-400 to-violet-400 bg-clip-text text-transparent sm:inline"> 可见的影响力</span>
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
+                聚合 GitHub 活动数据，捕捉贡献节奏、持续性与协作画像，并输出清晰锐利的矢量报告。
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {[
+                  ["01", "GraphQL signal"],
+                  ["02", "pandas engine"],
+                  ["03", "SVG vector export"],
+                ].map(([index, label]) => (
+                  <span key={label} className="flex items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.025] px-3 py-1.5 text-[9px] uppercase tracking-[0.13em] text-slate-500">
+                    <span className="font-bold text-cyan/70">{index}</span>{label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <SignalRadar />
           </div>
         </section>
 
@@ -282,14 +305,22 @@ export default function Dashboard() {
 
         {!data && !loading && (
           <section className="glass-panel relative grid min-h-[360px] place-items-center overflow-hidden rounded-2xl px-6 text-center">
-            <div className="absolute h-52 w-52 rounded-full border border-cyan/[0.06]" />
-            <div className="absolute h-72 w-72 rounded-full border border-violet-400/[0.04]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(40,215,255,.055),transparent_35%)]" />
+            <div className="radar-orbit absolute h-52 w-52 rounded-full border border-dashed border-cyan/[0.08]" />
+            <div className="absolute h-72 w-72 rounded-full border border-violet-400/[0.05]" />
+            <div className="absolute left-1/2 top-1/2 h-px w-80 -translate-x-1/2 bg-gradient-to-r from-transparent via-cyan/[0.08] to-transparent" />
+            <div className="absolute left-1/2 top-1/2 h-80 w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-cyan/[0.06] to-transparent" />
             <div className="relative">
               <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl border border-cyan/15 bg-gradient-to-br from-cyan/[0.08] to-violet-500/[0.08] text-cyan shadow-neon">
                 <Activity size={25} />
               </div>
               <h2 className="text-lg font-semibold text-slate-300">等待贡献信号</h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">填写用户名与时间范围，生成开发者活动的多维可视化报告。</p>
+              <div className="mt-5 flex justify-center gap-2">
+                {["ACCOUNT", "RANGE", "AGGREGATION"].map((item) => (
+                  <span key={item} className="tech-label rounded-full border border-white/[0.055] bg-white/[0.02] px-2.5 py-1 text-[7px] text-slate-700">{item}</span>
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -298,7 +329,7 @@ export default function Dashboard() {
           <>
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3.5">
-                {/* GitHub avatar is intentionally outside the export area to avoid cross-origin canvas restrictions. */}
+                {/* GitHub avatar stays outside the export area to avoid cross-origin image restrictions. */}
                 <img src={data.user.avatar_url} alt={data.user.login} className="h-11 w-11 rounded-xl border border-white/10 bg-slate-900" />
                 <div>
                   <div className="flex items-center gap-2">
@@ -312,7 +343,7 @@ export default function Dashboard() {
                 <span className="hidden h-7 w-px bg-white/[0.07] sm:block" />
                 <p className="hidden text-[10px] text-slate-600 sm:block">{data.meta.start_date} — {data.meta.end_date}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => exportCsv(data)}
@@ -323,15 +354,38 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={handlePngExport}
-                  disabled={exporting}
-                  className="flex h-9 items-center gap-2 rounded-xl border border-violet-400/20 bg-violet-500/[0.07] px-3.5 text-[11px] font-medium text-violet-300 transition hover:bg-violet-500/[0.12] disabled:opacity-50"
+                  disabled={exporting !== null}
+                  className="flex h-9 items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 text-[11px] font-medium text-slate-400 transition hover:border-violet-400/20 hover:text-violet-300 disabled:opacity-50"
                 >
-                  {exporting ? <LoaderCircle className="animate-spin" size={14} /> : <Download size={14} />} 导出 PNG
+                  {exporting === "png" ? <LoaderCircle className="animate-spin" size={14} /> : <Download size={14} />} PNG
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSvgExport}
+                  disabled={exporting !== null}
+                  className="flex h-9 items-center gap-2 rounded-xl border border-cyan/25 bg-gradient-to-r from-cyan/[0.10] to-blue-500/[0.09] px-3.5 text-[11px] font-semibold text-cyan shadow-[0_0_22px_rgba(40,215,255,.08)] transition hover:border-cyan/40 hover:brightness-125 disabled:opacity-50"
+                >
+                  {exporting === "svg" ? <LoaderCircle className="animate-spin" size={14} /> : <FileCode2 size={14} />} 导出 SVG
                 </button>
               </div>
             </div>
 
             <div id="visual-report" className="rounded-3xl bg-[#050714] p-1">
+              <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/[0.055] bg-gradient-to-r from-cyan/[0.045] via-transparent to-violet-500/[0.045] px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-8 w-8 place-items-center rounded-lg border border-cyan/20 bg-cyan/[0.07] text-cyan">
+                    <BarChart3 size={15} />
+                  </div>
+                  <div>
+                    <p className="tech-label text-[8px] font-bold text-cyan/70">GITPULSE / VECTOR REPORT</p>
+                    <p className="mt-0.5 text-[10px] text-slate-600">@{data.user.login} · {data.meta.start_date} — {data.meta.end_date}</p>
+                  </div>
+                </div>
+                <div className="hidden items-center gap-2 sm:flex">
+                  <span className="signal-dot-cyan h-1.5 w-1.5 rounded-full bg-cyan" />
+                  <span className="tech-label text-[7px] text-slate-700">SVG RENDER PIPELINE</span>
+                </div>
+              </div>
               <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <MetricCard label="Total contributions" value={data.meta.total_contributions.toLocaleString()} note={`${dateCount} days observed`} icon={Zap} accent="cyan" />
                 <MetricCard label="Active days" value={data.meta.active_days.toLocaleString()} note={`${Math.round((data.meta.active_days / Math.max(dateCount, 1)) * 100)}% activity rate`} icon={CalendarDays} accent="blue" />
@@ -358,6 +412,68 @@ export default function Dashboard() {
   );
 }
 
+function SignalRadar() {
+  return (
+    <div className="signal-radar relative hidden h-[230px] overflow-hidden rounded-3xl border border-cyan/[0.10] bg-[#050816]/70 p-5 shadow-[inset_0_0_45px_rgba(40,215,255,.035),0_0_45px_rgba(64,72,255,.06)] lg:block">
+      <div className="absolute left-5 top-4 z-10">
+        <p className="tech-label text-[8px] font-bold text-cyan/70">CONTRIBUTION SIGNAL</p>
+        <p className="mt-1 text-[9px] text-slate-700">Live activity topology</p>
+      </div>
+      <div className="absolute right-5 top-5 flex items-center gap-1.5">
+        <span className="signal-dot-cyan h-1.5 w-1.5 rounded-full bg-cyan" />
+        <span className="tech-label text-[7px] text-cyan/50">SCANNING</span>
+      </div>
+
+      <svg className="absolute inset-x-0 bottom-0 h-[205px] w-full" viewBox="0 0 380 205" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="signal-line" x1="46" y1="148" x2="332" y2="57" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#2856ff" stopOpacity="0.18" />
+            <stop offset="0.48" stopColor="#28d7ff" />
+            <stop offset="1" stopColor="#9b5cff" stopOpacity="0.75" />
+          </linearGradient>
+          <radialGradient id="signal-core">
+            <stop stopColor="#8beaff" stopOpacity="0.95" />
+            <stop offset="0.25" stopColor="#28d7ff" stopOpacity="0.45" />
+            <stop offset="1" stopColor="#28d7ff" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <g opacity="0.34">
+          <path d="M22 50H358M22 92H358M22 134H358M22 176H358" stroke="#55709d" strokeOpacity="0.16" />
+          <path d="M64 24V187M127 24V187M190 24V187M253 24V187M316 24V187" stroke="#55709d" strokeOpacity="0.13" />
+        </g>
+        <g className="radar-orbit" opacity="0.8">
+          <circle cx="190" cy="108" r="58" stroke="#28d7ff" strokeOpacity="0.16" />
+          <circle cx="190" cy="108" r="84" stroke="#8660ff" strokeOpacity="0.10" strokeDasharray="2 8" />
+          <path d="M190 24V192M106 108H274" stroke="#28d7ff" strokeOpacity="0.08" />
+        </g>
+        <path d="M35 159C71 153 84 124 119 131C151 138 159 101 190 106C222 111 239 80 270 88C298 95 316 62 346 52" stroke="url(#signal-line)" strokeWidth="2" />
+        <path className="signal-trace" d="M35 159C71 153 84 124 119 131C151 138 159 101 190 106C222 111 239 80 270 88C298 95 316 62 346 52" stroke="#b9f5ff" strokeOpacity="0.8" strokeWidth="1" />
+        {[
+          [35, 159],
+          [119, 131],
+          [190, 106],
+          [270, 88],
+          [346, 52],
+        ].map(([cx, cy], index) => (
+          <g key={`${cx}-${cy}`}>
+            <circle cx={cx} cy={cy} r={index === 4 ? 16 : 9} fill="url(#signal-core)" />
+            <circle cx={cx} cy={cy} r="2.5" fill={index === 4 ? "#d8bcff" : "#72e7ff"} />
+          </g>
+        ))}
+      </svg>
+
+      <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
+        <div className="flex gap-1">
+          {[25, 42, 35, 63, 54, 78, 68].map((height, index) => (
+            <span key={index} className="w-1 rounded-full bg-gradient-to-t from-blue-600/35 to-cyan/80" style={{ height: `${height / 4}px` }} />
+          ))}
+        </div>
+        <span className="tech-label text-[7px] text-slate-700">VECTOR OUTPUT / READY</span>
+      </div>
+    </div>
+  );
+}
+
 function LoadingState() {
   return (
     <div className="space-y-4">
@@ -375,4 +491,3 @@ function LoadingState() {
     </div>
   );
 }
-

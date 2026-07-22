@@ -52,3 +52,16 @@ export async function exportReportPng(elementId: string, filename: string): Prom
   anchor.click();
 }
 
+export async function exportReportSvg(elementId: string, filename: string): Promise<void> {
+  const node = document.getElementById(elementId);
+  if (!node) throw new Error("找不到可导出的图表区域");
+  const { toSvg } = await import("html-to-image");
+  const dataUrl = await toSvg(node, {
+    cacheBust: true,
+    backgroundColor: "#050714",
+  });
+  const anchor = document.createElement("a");
+  anchor.download = filename;
+  anchor.href = dataUrl;
+  anchor.click();
+}

@@ -19,8 +19,7 @@ export default function EChart({ option, height = 320 }: EChartProps) {
       notMerge
       lazyUpdate
       style={{ height, width: "100%" }}
-      opts={{ renderer: "canvas", devicePixelRatio: 2 }}
+      opts={{ renderer: "svg" }}
     />
   );
 }
-
