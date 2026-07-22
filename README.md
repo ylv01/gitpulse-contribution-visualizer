@@ -88,7 +88,7 @@ GitHub GraphQL API 必须经过身份认证，因此“Token 可选”指：
 ### 1. 启动后端
 
 ```powershell
-cd "E:\GitHub Contribution Visualizer\backend"
+cd "E:\GitHub Contribution Visualizer\backend"(取决于你的项目拉取盘符和位置修改)
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -120,7 +120,7 @@ uvicorn app.main:app --reload --port 8000
 另开一个 PowerShell：
 
 ```powershell
-cd "E:\GitHub Contribution Visualizer\frontend"
+cd "E:\GitHub Contribution Visualizer\frontend"(取决于你的项目拉取盘符和位置修改)
 Copy-Item .env.example .env.local
 npm install
 npm run dev
