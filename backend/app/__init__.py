@@ -1,0 +1,2 @@
+"""GitHub Contribution Visualizer API."""
+

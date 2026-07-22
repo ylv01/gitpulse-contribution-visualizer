@@ -1,0 +1,18 @@
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# Backend
+backend/.venv/
+backend/.env
+backend/**/__pycache__/
+backend/.pytest_cache/
+*.py[cod]
+
+# Local files
+.env
+.DS_Store
+Thumbs.db
+

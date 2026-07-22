@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #050714;
+  --foreground: #e8edf8;
+  --muted: #8793ad;
+  --cyan: #28d7ff;
+  --violet: #8b5cf6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 12% 3%, rgba(35, 94, 220, 0.18), transparent 29rem),
+    radial-gradient(circle at 88% 8%, rgba(120, 51, 218, 0.17), transparent 28rem),
+    linear-gradient(180deg, #060817 0%, #040611 100%);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  opacity: 0.38;
+  background-image:
+    linear-gradient(rgba(72, 109, 180, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72, 109, 180, 0.055) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 78%);
+}
+
+::selection {
+  color: white;
+  background: rgba(80, 100, 255, 0.65);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050714;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid #050714;
+  border-radius: 999px;
+  background: #253050;
+}
+
+@layer components {
+  .glass-panel {
+    @apply border border-white/[0.075] bg-[#0a0e20]/80 shadow-neon backdrop-blur-xl;
+  }
+
+  .field-label {
+    @apply mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500;
+  }
+
+  .input-shell {
+    @apply h-11 w-full rounded-xl border border-white/[0.08] bg-[#070a17]/90 px-3.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-700 hover:border-white/[0.14] focus:border-cyan/60 focus:ring-2 focus:ring-cyan/10;
+  }
+
+  .tech-label {
+    font-family: "Arial Narrow", "Roboto Condensed", ui-sans-serif, sans-serif;
+    letter-spacing: 0.16em;
+  }
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(75%) sepia(8%) saturate(540%) hue-rotate(182deg);
+}
+
+.chart-card::after {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  left: 24px;
+  height: 1px;
+  content: "";
+  opacity: 0.8;
+  background: linear-gradient(90deg, transparent, rgba(40, 215, 255, 0.34), transparent);
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,.025), rgba(74,128,255,.09), rgba(255,255,255,.025));
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+

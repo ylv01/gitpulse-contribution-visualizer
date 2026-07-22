@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      FRONTEND_ORIGINS: http://localhost:3000
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
