@@ -52,3 +52,31 @@ export interface ContributionResponse {
   };
 }
 
+export type AutomationEndMode = "today" | "fixed";
+
+export interface AutomationConfig {
+  enabled: boolean;
+  username: string;
+  start_date: string;
+  end_mode: AutomationEndMode;
+  end_date: string | null;
+  aggregation: Aggregation;
+  schedule_time: string;
+  time_zone: string;
+  require_proxy: boolean;
+  target_repository: string;
+  target_branch: string;
+  target_path: string;
+}
+
+export interface AutomationConfigResponse {
+  config: AutomationConfig;
+  token_configured: boolean;
+}
+
+export interface AutomationRunResponse {
+  status: "generated" | "pushed" | "unchanged";
+  message: string;
+  output_path?: string | null;
+  commit_url?: string | null;
+}

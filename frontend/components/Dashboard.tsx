@@ -23,11 +23,12 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useState } from "react";
 
 import { fetchContributions } from "@/lib/api";
 import { exportCsv, exportReportPng, exportReportSvg } from "@/lib/export";
-import type { Aggregation, ContributionResponse } from "@/lib/types";
+import type { Aggregation, AutomationConfig, ContributionResponse } from "@/lib/types";
+import AutomationPanel from "./AutomationPanel";
 import ActivityChart from "./charts/ActivityChart";
 import HeatmapChart from "./charts/HeatmapChart";
 import TrendChart from "./charts/TrendChart";
@@ -61,10 +62,20 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState(initialRange.start);
   const [endDate, setEndDate] = useState(initialRange.end);
   const [aggregation, setAggregation] = useState<Aggregation>("week");
+  const [mode, setMode] = useState<"manual" | "automation">("manual");
   const [data, setData] = useState<ContributionResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState<"svg" | "png" | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleAutomationConfigLoad = useCallback((config: AutomationConfig) => {
+    setUsername(config.username);
+    setStartDate(config.start_date);
+    setEndDate(config.end_mode === "fixed" && config.end_date ? config.end_date : formatDate(new Date()));
+    setAggregation(config.aggregation);
+  }, []);
+
+  const handleAutomationError = useCallback((message: string) => setError(message), []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -203,8 +214,26 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="hidden items-center gap-1.5 text-[10px] text-slate-600 sm:flex">
-              <ShieldCheck size={13} className="text-emerald-400/60" /> Token 仅用于本次请求，不会持久化
+              <ShieldCheck size={13} className="text-emerald-400/60" />
+              {mode === "manual" ? "Token 仅用于本次请求，不会持久化" : "只有保存自动化配置时才会持久化 Token"}
             </div>
+          </div>
+
+          <div className="mb-5 grid max-w-md grid-cols-2 rounded-xl border border-white/[0.08] bg-[#070a17]/80 p-1">
+            <button
+              type="button"
+              onClick={() => setMode("manual")}
+              className={`rounded-lg px-4 py-2 text-xs font-medium transition ${mode === "manual" ? "bg-cyan/[0.10] text-cyan shadow-[inset_0_0_0_1px_rgba(40,215,255,.16)]" : "text-slate-600 hover:text-slate-300"}`}
+            >
+              单次生成
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("automation")}
+              className={`rounded-lg px-4 py-2 text-xs font-medium transition ${mode === "automation" ? "bg-violet-500/[0.12] text-violet-300 shadow-[inset_0_0_0_1px_rgba(139,92,246,.2)]" : "text-slate-600 hover:text-slate-300"}`}
+            >
+              自动更新
+            </button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.1fr_1.25fr_.9fr_.9fr_1.05fr_auto] xl:items-end">
@@ -282,15 +311,29 @@ export default function Dashboard() {
               className="group flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 text-xs font-semibold text-white shadow-[0_0_25px_rgba(73,89,255,.25)] transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60 md:col-span-2 xl:col-span-1"
             >
               {loading ? <LoaderCircle className="animate-spin" size={15} /> : <Zap size={15} fill="currentColor" />}
-              {loading ? "解析中" : "生成图谱"}
+              {loading ? "解析中" : mode === "manual" ? "生成图谱" : "预览图谱"}
               {!loading && <ChevronRight size={14} className="transition group-hover:translate-x-0.5" />}
             </button>
           </div>
 
           <div className="mt-4 flex items-center gap-1.5 text-[10px] text-slate-700 sm:hidden">
-            <ShieldCheck size={12} className="text-emerald-400/60" /> Token 仅用于本次请求，不会持久化
+            <ShieldCheck size={12} className="text-emerald-400/60" />
+            {mode === "manual" ? "Token 仅用于本次请求，不会持久化" : "保存自动配置时才会写入本地 Token 文件"}
           </div>
         </form>
+
+        {mode === "automation" && (
+          <AutomationPanel
+            username={username}
+            token={token}
+            startDate={startDate}
+            endDate={endDate}
+            aggregation={aggregation}
+            onLoadConfig={handleAutomationConfigLoad}
+            onTokenSaved={() => setToken("")}
+            onError={handleAutomationError}
+          />
+        )}
 
         {error && (
           <div className="mb-7 flex items-start justify-between gap-4 rounded-2xl border border-rose-400/15 bg-rose-400/[0.055] px-4 py-3.5 text-sm text-rose-200/85">

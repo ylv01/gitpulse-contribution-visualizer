@@ -9,10 +9,15 @@ backend/.venv/
 backend/.env
 backend/**/__pycache__/
 backend/.pytest_cache/
+backend/.pytest-tmp/
 *.py[cod]
 
 # Local files
 .env
+automation/.env.local
+automation/config.local.json
+automation/generated/
+automation/.state/
+.sites-runtime/
 .DS_Store
 Thumbs.db
-

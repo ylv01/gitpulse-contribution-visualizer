@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "username": "ylv01",
+  "start_date": "2026-06-01",
+  "end_mode": "today",
+  "end_date": null,
+  "aggregation": "month",
+  "schedule_time": "09:00",
+  "time_zone": "Asia/Shanghai",
+  "require_proxy": true,
+  "target_repository": "ylv01/ylv01",
+  "target_branch": "main",
+  "target_path": "others_show/ylv01-contribution-report.svg"
+}
