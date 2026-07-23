@@ -8,7 +8,9 @@ import EChart from "./EChart";
 
 export default function TrendChart({ data }: { data: TrendPoint[] }) {
   const option: EChartsOption = {
-    animationDuration: 850,
+    animation: true,
+    animationDuration: 1450,
+    animationEasing: "cubicOut",
     grid: { left: 44, right: 18, top: 24, bottom: 50 },
     tooltip: {
       trigger: "axis",
@@ -42,6 +44,9 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
         type: "line",
         data: data.map((item) => item.count),
         smooth: 0.28,
+        animation: true,
+        animationDuration: 1450,
+        animationEasing: "cubicOut",
         showSymbol: data.length < 45,
         symbolSize: 5,
         lineStyle: {
@@ -87,7 +92,10 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
         showSymbol: false,
         silent: true,
         z: 12,
-        animation: false,
+        animation: true,
+        animationDuration: 1450,
+        animationDelay: 70,
+        animationEasing: "cubicOut",
         lineStyle: {
           width: 2.2,
           color: "#d5fbff",

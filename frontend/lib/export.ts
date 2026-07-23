@@ -60,6 +60,8 @@ interface SvgSource {
   height: number;
 }
 
+type ExportAnimation = "trend" | "activity" | undefined;
+
 function escapeXml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({
     "&": "&amp;",
@@ -136,7 +138,7 @@ function serializeChart(
   prefix: string,
   x: number,
   y: number,
-  animateTrend = false,
+  animationType?: ExportAnimation,
 ): string {
   const svg = source.element.cloneNode(true) as SVGSVGElement;
   namespaceSvg(svg, prefix);
@@ -147,7 +149,7 @@ function serializeChart(
   svg.setAttribute("viewBox", `0 0 ${source.width} ${source.height}`);
   svg.setAttribute("overflow", "visible");
 
-  if (animateTrend) {
+  if (animationType === "trend") {
     const flowPath = svg.querySelector<SVGPathElement>('path[stroke="#d5fbff"]');
     if (!flowPath) throw new Error("未找到趋势流光路径，请刷新页面后重试");
     flowPath.setAttribute("stroke-dasharray", "5 11 24 17");
@@ -158,6 +160,74 @@ function serializeChart(
     animation.setAttribute("dur", "2.9s");
     animation.setAttribute("repeatCount", "indefinite");
     flowPath.appendChild(animation);
+
+    const reveal = document.createElementNS(SVG_NS, "rect");
+    reveal.setAttribute("x", "0");
+    reveal.setAttribute("y", "0");
+    reveal.setAttribute("width", String(source.width));
+    reveal.setAttribute("height", String(source.height));
+    reveal.setAttribute("fill", "#0a0e20");
+    reveal.setAttribute("pointer-events", "none");
+
+    const revealX = document.createElementNS(SVG_NS, "animate");
+    revealX.setAttribute("attributeName", "x");
+    revealX.setAttribute("values", `0;${source.width}`);
+    revealX.setAttribute("dur", "1.45s");
+    revealX.setAttribute("fill", "freeze");
+
+    const revealWidth = document.createElementNS(SVG_NS, "animate");
+    revealWidth.setAttribute("attributeName", "width");
+    revealWidth.setAttribute("values", `${source.width};0`);
+    revealWidth.setAttribute("dur", "1.45s");
+    revealWidth.setAttribute("fill", "freeze");
+
+    reveal.append(revealX, revealWidth);
+    svg.appendChild(reveal);
+  }
+
+  if (animationType === "activity") {
+    const sectors = Array.from(svg.querySelectorAll<SVGPathElement>('path[stroke="#090d1e"]'));
+    if (sectors.length) {
+      const centerX = source.width * 0.35;
+      const centerY = source.height * 0.5;
+      const baseSize = Math.min(source.width, source.height);
+      const radius = baseSize * 0.3225;
+      const strokeWidth = baseSize * 0.13;
+      const circumference = 2 * Math.PI * radius;
+      const maskId = `${prefix}-ring-reveal`;
+      const defs = svg.querySelector("defs") ?? svg.insertBefore(document.createElementNS(SVG_NS, "defs"), svg.firstChild);
+      const mask = document.createElementNS(SVG_NS, "mask");
+      mask.setAttribute("id", maskId);
+      mask.setAttribute("maskUnits", "userSpaceOnUse");
+      mask.setAttribute("x", "0");
+      mask.setAttribute("y", "0");
+      mask.setAttribute("width", String(source.width));
+      mask.setAttribute("height", String(source.height));
+
+      const ring = document.createElementNS(SVG_NS, "circle");
+      ring.setAttribute("cx", String(centerX));
+      ring.setAttribute("cy", String(centerY));
+      ring.setAttribute("r", String(radius));
+      ring.setAttribute("fill", "none");
+      ring.setAttribute("stroke", "white");
+      ring.setAttribute("stroke-width", String(strokeWidth));
+      ring.setAttribute("stroke-linecap", "round");
+      ring.setAttribute("stroke-dasharray", String(circumference));
+      ring.setAttribute("stroke-dashoffset", String(circumference));
+      ring.setAttribute("transform", `rotate(-90 ${centerX} ${centerY})`);
+
+      const ringAnimation = document.createElementNS(SVG_NS, "animate");
+      ringAnimation.setAttribute("attributeName", "stroke-dashoffset");
+      ringAnimation.setAttribute("values", `${circumference};0`);
+      ringAnimation.setAttribute("dur", "1.65s");
+      ringAnimation.setAttribute("fill", "freeze");
+      ringAnimation.setAttribute("calcMode", "spline");
+      ringAnimation.setAttribute("keySplines", "0.22 1 0.36 1");
+      ring.appendChild(ringAnimation);
+      mask.appendChild(ring);
+      defs.appendChild(mask);
+      sectors.forEach((sector) => sector.setAttribute("mask", `url(#${maskId})`));
+    }
   }
 
   return new XMLSerializer().serializeToString(svg);
@@ -234,9 +304,9 @@ export async function exportReportSvg(elementId: string, filename: string): Prom
   const heatmapCardWidth = canvasWidth - margin * 2;
   const heatmapChartX = margin + (heatmapCardWidth - heatmap.width) / 2;
 
-  const trendSvg = serializeChart(trend, "trend", margin + cardPadding, margin + chartTop, true);
+  const trendSvg = serializeChart(trend, "trend", margin + cardPadding, margin + chartTop, "trend");
   const activitySvg = activity
-    ? serializeChart(activity, "activity", activityX + cardPadding, margin + chartTop)
+    ? serializeChart(activity, "activity", activityX + cardPadding, margin + chartTop, "activity")
     : `<text x="${activityX + activityCardWidth / 2}" y="${margin + chartTop + activityHeight / 2}" text-anchor="middle" fill="#59657e" font-size="14">该时间段暂无分类活动</text>`;
   const heatmapSvg = serializeChart(heatmap, "heatmap", heatmapChartX, heatmapY + chartTop);
 
@@ -260,7 +330,7 @@ export async function exportReportSvg(elementId: string, filename: string): Prom
   <rect width="100%" height="100%" fill="url(#canvas-bg)" />
   <rect width="100%" height="100%" fill="url(#grid)" />
   ${chartCard(margin, margin, trendCardWidth, topCardHeight, "Signal / 01", "贡献趋势", "选定时间窗内的贡献强度变化 · 霓虹光泽沿时间方向持续流动", trendSvg)}
-  ${chartCard(activityX, margin, activityCardWidth, topCardHeight, "Signal / 02", "活动类型分布", "公开活动的构成与协作偏好", activitySvg, "violet")}
+  ${chartCard(activityX, margin, activityCardWidth, topCardHeight, "Signal / 02", "活动类型分布", "公开活动的构成与协作偏好 · 圆环顺时针加载", activitySvg, "violet")}
   ${chartCard(margin, heatmapY, heatmapCardWidth, heatmapCardHeight, "Signal / 03", "贡献热力图", "GitHub 风格日历矩阵，颜色越亮表示贡献越集中", heatmapSvg)}
 </svg>`;
 

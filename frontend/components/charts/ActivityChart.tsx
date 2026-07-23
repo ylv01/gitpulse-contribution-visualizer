@@ -17,6 +17,9 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
   ];
   const total = entries.reduce((sum, item) => sum + item.value, 0);
   const option: EChartsOption = {
+    animation: true,
+    animationDuration: 1650,
+    animationEasing: "cubicOut",
     color: COLORS,
     tooltip: {
       trigger: "item",
@@ -51,6 +54,12 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
     series: [
       {
         type: "pie",
+        animation: true,
+        animationType: "expansion",
+        animationDuration: 1650,
+        animationEasing: "cubicOut",
+        startAngle: 90,
+        clockwise: true,
         radius: ["53%", "76%"],
         center: ["35%", "50%"],
         avoidLabelOverlap: true,
@@ -66,7 +75,7 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
     <ChartFrame
       eyebrow="Signal / 02"
       title="活动类型分布"
-      description="公开活动的构成与协作偏好"
+      description="公开活动的构成与协作偏好 · 圆环顺时针加载"
       accent="violet"
     >
       {total > 0 ? (
