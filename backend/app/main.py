@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from .config import get_settings
 from .github_client import GitHubAPIError
@@ -21,6 +22,7 @@ from .services.automation_config import (
     save_automation_token,
 )
 from .services.contributions import get_contributions
+from .services.svg_report import render_contribution_svg
 
 
 settings = get_settings()
@@ -56,6 +58,15 @@ async def contributions(request: ContributionRequest) -> ContributionResponse:
         )
     except GitHubAPIError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+
+@app.post("/api/reports/svg")
+async def contribution_svg_report(request: ContributionResponse) -> Response:
+    return Response(
+        content=render_contribution_svg(request),
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/api/automation/config", response_model=AutomationConfigResponse)

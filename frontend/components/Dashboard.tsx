@@ -117,7 +117,7 @@ export default function Dashboard() {
     if (!data) return;
     setExporting("svg");
     try {
-      await exportReportSvg("visual-report", `${data.user.login}-contribution-report.svg`);
+      await exportReportSvg(data, `${data.user.login}-contribution-report.svg`);
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : "SVG 导出失败");
     } finally {
@@ -215,7 +215,7 @@ export default function Dashboard() {
             </div>
             <div className="hidden items-center gap-1.5 text-[10px] text-slate-600 sm:flex">
               <ShieldCheck size={13} className="text-emerald-400/60" />
-              {mode === "manual" ? "Token 仅用于本次请求，不会持久化" : "只有保存自动化配置时才会持久化 Token"}
+              {mode === "manual" ? "页面 Token 仅用于本次请求；留空时读取后端配置" : "首次配置需输入 Token；保存后写入本地忽略文件"}
             </div>
           </div>
 
@@ -253,7 +253,12 @@ export default function Dashboard() {
             </label>
 
             <label>
-              <span className="field-label">GitHub token <span className="normal-case tracking-normal text-slate-700">(可选)</span></span>
+              <span className="field-label">
+                GitHub Token{" "}
+                <span className="normal-case tracking-normal text-slate-700">
+                  {mode === "manual" ? "(页面输入，或读取 backend/.env)" : "(首次必填；保存后写入本地文件)"}
+                </span>
+              </span>
               <div className="relative">
                 <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                 <input
@@ -261,7 +266,7 @@ export default function Dashboard() {
                   type={showToken ? "text" : "password"}
                   value={token}
                   onChange={(event) => setToken(event.target.value)}
-                  placeholder="ghp_••••••••"
+                  placeholder={mode === "manual" ? "输入 Token，或使用后端配置" : "首次配置请输入可写入目标仓库的 Token"}
                   autoComplete="off"
                 />
                 <button
@@ -318,7 +323,7 @@ export default function Dashboard() {
 
           <div className="mt-4 flex items-center gap-1.5 text-[10px] text-slate-700 sm:hidden">
             <ShieldCheck size={12} className="text-emerald-400/60" />
-            {mode === "manual" ? "Token 仅用于本次请求，不会持久化" : "保存自动配置时才会写入本地 Token 文件"}
+            {mode === "manual" ? "页面输入仅用于本次请求；留空时读取 backend/.env" : "首次配置必填；保存后写入 automation/.env.local"}
           </div>
         </form>
 

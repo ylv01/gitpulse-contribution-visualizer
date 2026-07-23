@@ -1,8 +1,11 @@
 from datetime import date
+from xml.etree import ElementTree
 
 import pytest
+from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
+from app.main import app
 from app.models import (
     ActivityBreakdown,
     AutomationConfig,
@@ -59,6 +62,14 @@ def test_svg_report_contains_native_animations() -> None:
     )
 
     svg = render_contribution_svg(response)
+    ElementTree.fromstring(svg)
     assert "<animate" in svg
     assert "@octocat" in svg
-    assert "DAILY HEATMAP" in svg
+    assert "SIGNAL / 01" in svg
+    assert "贡献热力图" in svg
+    assert "AUTOMATED VECTOR REPORT" not in svg
+
+    api_response = TestClient(app).post("/api/reports/svg", json=response.model_dump(mode="json"))
+    assert api_response.status_code == 200
+    assert api_response.headers["content-type"].startswith("image/svg+xml")
+    assert api_response.text == svg

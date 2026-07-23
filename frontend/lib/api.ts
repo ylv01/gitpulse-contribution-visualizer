@@ -30,6 +30,26 @@ export async function fetchContributions(input: ContributionRequest): Promise<Co
   return response.json() as Promise<ContributionResponse>;
 }
 
+export async function fetchContributionSvg(data: ContributionResponse): Promise<string> {
+  const response = await fetch(`${API_BASE_URL}/api/reports/svg`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    let message = `SVG 生成失败（${response.status}）`;
+    try {
+      const payload = (await response.json()) as { detail?: string };
+      if (payload.detail) message = payload.detail;
+    } catch {
+      // Keep the status fallback.
+    }
+    throw new Error(message);
+  }
+  return response.text();
+}
+
 async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, init);
   if (!response.ok) {
