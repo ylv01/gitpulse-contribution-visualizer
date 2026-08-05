@@ -68,6 +68,9 @@ def test_svg_report_contains_native_animations() -> None:
     assert "SIGNAL / 01" in svg
     assert "贡献热力图" in svg
     assert "AUTOMATED VECTOR REPORT" not in svg
+    assert "选定时间窗内的贡献强度变化" not in svg
+    assert "公开活动的构成与协作偏好" not in svg
+    assert "GitHub 风格日历矩阵" not in svg
 
     api_response = TestClient(app).post("/api/reports/svg", json=response.model_dump(mode="json"))
     assert api_response.status_code == 200

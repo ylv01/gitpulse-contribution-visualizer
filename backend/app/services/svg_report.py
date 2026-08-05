@@ -97,7 +97,6 @@ def _card(
     height: int,
     eyebrow: str,
     title: str,
-    description: str,
     content: str,
     accent: str = "#28d7ff",
     animated_status: bool = True,
@@ -111,7 +110,6 @@ def _card(
       <path d="M{x + 24} {y + 1}H{x + width - 24}" stroke="url(#card-line)" />
       <text x="{x + 20}" y="{y + 25}" fill="{accent}" class="eyebrow">{escape(eyebrow.upper())}</text>
       <text x="{x + 20}" y="{y + 48}" class="card-title">{escape(title)}</text>
-      <text x="{x + 20}" y="{y + 67}" class="description">{escape(description)}</text>
       {status}
       {content}
     </g>"""
@@ -208,7 +206,7 @@ def _activity_chart(data: ContributionResponse) -> str:
         offset += length
 
     if total == 0:
-        return f'<text x="{ACTIVITY_X + ACTIVITY_CARD_WIDTH / 2}" y="{center_y}" text-anchor="middle" class="description">该时间段暂无分类活动</text>'
+        return f'<text x="{ACTIVITY_X + ACTIVITY_CARD_WIDTH / 2}" y="{center_y}" text-anchor="middle" class="empty-state">该时间段暂无分类活动</text>'
     return (
         f'<circle cx="{center_x}" cy="{center_y}" r="{radius}" fill="none" stroke="#151c31" stroke-width="{stroke_width}" />'
         f'<g mask="url(#activity-reveal)">{"".join(sectors)}</g>'
@@ -300,7 +298,6 @@ def render_contribution_svg(data: ContributionResponse) -> str:
         TOP_HEIGHT,
         "Signal / 01",
         "贡献趋势",
-        "选定时间窗内的贡献强度变化 · 霓虹光泽沿时间方向持续流动",
         _trend_chart(data),
     )
     activity_card = _card(
@@ -310,7 +307,6 @@ def render_contribution_svg(data: ContributionResponse) -> str:
         TOP_HEIGHT,
         "Signal / 02",
         "活动类型分布",
-        "公开活动的构成与协作偏好 · 圆环顺时针加载",
         _activity_chart(data),
         accent="#9b7cff",
         animated_status=False,
@@ -322,7 +318,6 @@ def render_contribution_svg(data: ContributionResponse) -> str:
         heatmap_card_height,
         "Signal / 03",
         "贡献热力图",
-        "GitHub 风格日历矩阵，颜色越亮表示贡献越集中",
         heatmap,
     )
 
@@ -347,7 +342,7 @@ def render_contribution_svg(data: ContributionResponse) -> str:
     text{{font-family:Inter,"Segoe UI","Microsoft YaHei",sans-serif}}
     .eyebrow{{font-size:10px;font-weight:700;letter-spacing:1.6px}}
     .card-title{{font-size:18px;font-weight:650;fill:#f1f5ff}}
-    .description{{font-size:11px;fill:#66728d}}
+    .empty-state{{font-size:11px;fill:#66728d}}
     .axis{{font-size:10px;fill:#64708a}}
     .day{{font-size:9px;fill:#58647d}}
     .year{{font-size:11px;fill:#6f7c98}}
