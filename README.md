@@ -270,3 +270,9 @@ npm run build
 - 自动化文件写入和 Windows 计划任务只面向本机部署；公共网站不应开放这些接口。
 - 日历总贡献可能包含 GitHub 不公开分类细节的贡献，因此它不一定等于四类活动数量之和。
 - GitHub API 的限流、可见性设置和 Token 权限会影响结果。
+
+## 开源许可
+
+本项目基于 [MIT License](LICENSE) 开源。
+
+Copyright (c) 2026 楊亮
