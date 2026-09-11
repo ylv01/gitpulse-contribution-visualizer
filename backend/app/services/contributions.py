@@ -128,6 +128,7 @@ async def get_contributions(
         activity.pull_requests += int(collection.get("totalPullRequestContributions", 0))
         activity.issues += int(collection.get("totalIssueContributions", 0))
         activity.code_reviews += int(collection.get("totalPullRequestReviewContributions", 0))
+        activity.repositories += int(collection.get("totalRepositoryContributions", 0))
         restricted += int(collection.get("restrictedContributionsCount", 0))
 
     first_user = users[0]
@@ -161,4 +162,3 @@ async def get_contributions(
             restricted_contributions=restricted,
         ),
     )
-

@@ -50,6 +50,7 @@ class ActivityBreakdown(BaseModel):
     pull_requests: int = 0
     issues: int = 0
     code_reviews: int = 0
+    repositories: int = 0
 
 
 class QueryMeta(BaseModel):

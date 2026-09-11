@@ -31,6 +31,7 @@ query ContributionDashboard($login: String!, $from: DateTime!, $to: DateTime!) {
       totalIssueContributions
       totalPullRequestContributions
       totalPullRequestReviewContributions
+      totalRepositoryContributions
       restrictedContributionsCount
     }
   }
@@ -110,4 +111,3 @@ class GitHubClient:
         if not user:
             raise GitHubAPIError("未找到该 GitHub 用户。", 404)
         return user
-

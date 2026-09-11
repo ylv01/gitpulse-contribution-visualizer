@@ -44,17 +44,17 @@ def test_svg_report_contains_native_animations() -> None:
         user=UserProfile(login="octocat", name="Octocat", avatar_url="https://example.com/a.png", profile_url="https://github.com/octocat"),
         daily=[
             ContributionDay(date=date(2026, 6, 1), count=2, color="#174285", weekday=1),
-            ContributionDay(date=date(2026, 6, 2), count=5, color="#366ff2", weekday=2),
+            ContributionDay(date=date(2026, 6, 2), count=8, color="#366ff2", weekday=2),
         ],
         trend=[
-            TrendPoint(label="2026-06", start_date=date(2026, 6, 1), end_date=date(2026, 6, 2), count=7),
+            TrendPoint(label="2026-06", start_date=date(2026, 6, 1), end_date=date(2026, 6, 2), count=10),
         ],
-        activity=ActivityBreakdown(commits=5, pull_requests=1, issues=1, code_reviews=0),
+        activity=ActivityBreakdown(commits=5, pull_requests=1, issues=1, code_reviews=0, repositories=3),
         meta=QueryMeta(
             start_date=date(2026, 6, 1),
             end_date=date(2026, 6, 2),
             aggregation="month",
-            total_contributions=7,
+            total_contributions=10,
             active_days=2,
             longest_streak=2,
             restricted_contributions=0,
@@ -71,8 +71,21 @@ def test_svg_report_contains_native_animations() -> None:
     assert "选定时间窗内的贡献强度变化" not in svg
     assert "公开活动的构成与协作偏好" not in svg
     assert "GitHub 风格日历矩阵" not in svg
+    assert "Repositories  3" in svg
+    assert "创建仓库" not in svg
+    assert 'class="activity-total">10</text>' in svg
+    assert 'stroke="#2dd4bf"' in svg
 
     api_response = TestClient(app).post("/api/reports/svg", json=response.model_dump(mode="json"))
     assert api_response.status_code == 200
     assert api_response.headers["content-type"].startswith("image/svg+xml")
     assert api_response.text == svg
+
+    response.activity = ActivityBreakdown(repositories=3)
+    repository_only = render_contribution_svg(response)
+    ElementTree.fromstring(repository_only)
+    assert 'class="activity-total">3</text>' in repository_only
+    assert "Repositories  3" in repository_only
+
+    response.activity = ActivityBreakdown()
+    assert "该时间段暂无分类活动" in render_contribution_svg(response)
