@@ -33,6 +33,7 @@ export function exportCsv(data: ContributionResponse): void {
     `pull_requests,${data.activity.pull_requests}`,
     `issues,${data.activity.issues}`,
     `code_reviews,${data.activity.code_reviews}`,
+    `repositories,${data.activity.repositories ?? 0}`,
   ];
 
   download(`\uFEFF${lines.join("\n")}`, "text/csv;charset=utf-8", `${data.user.login}-contributions.csv`);

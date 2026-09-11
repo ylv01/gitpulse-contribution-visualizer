@@ -6,7 +6,7 @@ import type { ActivityBreakdown } from "@/lib/types";
 import ChartFrame from "./ChartFrame";
 import EChart from "./EChart";
 
-const COLORS = ["#28d7ff", "#5a7cff", "#8b5cf6", "#d053ff"];
+const COLORS = ["#28d7ff", "#5a7cff", "#8b5cf6", "#d053ff", "#2dd4bf"];
 
 export default function ActivityChart({ activity }: { activity: ActivityBreakdown }) {
   const entries = [
@@ -14,6 +14,7 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
     { name: "Pull requests", value: activity.pull_requests },
     { name: "Issues", value: activity.issues },
     { name: "Code reviews", value: activity.code_reviews },
+    { name: "创建仓库", value: activity.repositories ?? 0 },
   ];
   const total = entries.reduce((sum, item) => sum + item.value, 0);
   const option: EChartsOption = {
@@ -75,7 +76,7 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
     <ChartFrame
       eyebrow="Signal / 02"
       title="活动类型分布"
-      description="公开活动的构成与协作偏好 · 圆环顺时针加载"
+      description="可见活动的构成与协作偏好 · 含创建仓库 · 圆环顺时针加载"
       accent="violet"
     >
       {total > 0 ? (

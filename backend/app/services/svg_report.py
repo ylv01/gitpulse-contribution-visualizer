@@ -179,6 +179,7 @@ def _activity_chart(data: ContributionResponse) -> str:
         ("Pull requests", data.activity.pull_requests, "#5a7cff"),
         ("Issues", data.activity.issues, "#8b5cf6"),
         ("Code reviews", data.activity.code_reviews, "#d053ff"),
+        ("Repositories", data.activity.repositories, "#2dd4bf"),
     ]
     total = sum(value for _, value, _ in entries)
     center_x = ACTIVITY_X + 163
@@ -198,7 +199,7 @@ def _activity_chart(data: ContributionResponse) -> str:
                 f'stroke-linecap="round" stroke-dasharray="{visible:.2f} {circumference - visible:.2f}" stroke-dashoffset="{-offset:.2f}" '
                 f'transform="rotate(-90 {center_x} {center_y})" />'
             )
-        legend_y = center_y - 56 + index * 36
+        legend_y = center_y - (len(entries) - 1) * 18 + index * 36
         legend.append(
             f'<circle cx="{center_x + 171}" cy="{legend_y}" r="4" fill="{color}" />'
             f'<text x="{center_x + 184}" y="{legend_y + 4}" class="legend">{escape(name)}  {value}</text>'

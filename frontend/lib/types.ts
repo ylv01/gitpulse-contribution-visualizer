@@ -34,6 +34,7 @@ export interface ActivityBreakdown {
   pull_requests: number;
   issues: number;
   code_reviews: number;
+  repositories: number;
 }
 
 export interface ContributionResponse {
