@@ -18,6 +18,7 @@ function download(content: BlobPart, mime: string, filename: string): void {
 export function exportCsv(data: ContributionResponse): void {
   const lines: string[] = [
     "DAILY CONTRIBUTIONS",
+    `range,${data.meta.start_date},${data.meta.end_date}`,
     "date,contribution_count",
     ...data.daily.map((item) => `${quote(item.date)},${item.count}`),
     "",
@@ -28,6 +29,8 @@ export function exportCsv(data: ContributionResponse): void {
     ),
     "",
     "ACTIVITY BREAKDOWN",
+    `scope,${data.meta.activity_scope ?? "selected"}`,
+    `range,${data.meta.activity_start_date ?? data.meta.start_date},${data.meta.activity_end_date ?? data.meta.end_date}`,
     "activity_type,count",
     `commits,${data.activity.commits}`,
     `pull_requests,${data.activity.pull_requests}`,

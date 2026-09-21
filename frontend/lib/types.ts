@@ -1,11 +1,23 @@
 export type Aggregation = "day" | "week" | "month";
 
+export interface ChartRange {
+  mode: "recent" | "custom";
+  unit: Aggregation;
+  count: number;
+  start_date?: string | null;
+  end_date?: string | null;
+}
+
 export interface ContributionRequest {
   username: string;
   token?: string;
   start_date: string;
   end_date: string;
   aggregation: Aggregation;
+  trend_weeks?: number | null;
+  trend_range?: ChartRange | null;
+  heatmap_range?: ChartRange | null;
+  activity_scope?: "all" | "selected";
 }
 
 export interface UserProfile {
@@ -46,10 +58,17 @@ export interface ContributionResponse {
     start_date: string;
     end_date: string;
     aggregation: Aggregation;
+    trend_weeks?: number | null;
     total_contributions: number;
     active_days: number;
     longest_streak: number;
     restricted_contributions: number;
+    trend_start_date?: string | null;
+    trend_end_date?: string | null;
+    activity_start_date?: string | null;
+    activity_end_date?: string | null;
+    activity_scope?: "all" | "selected";
+    activity_restricted_contributions?: number;
   };
 }
 
@@ -62,6 +81,10 @@ export interface AutomationConfig {
   end_mode: AutomationEndMode;
   end_date: string | null;
   aggregation: Aggregation;
+  trend_weeks?: number | null;
+  trend_range?: ChartRange | null;
+  heatmap_range?: ChartRange | null;
+  activity_scope?: "all" | "selected";
   schedule_time: string;
   time_zone: string;
   require_proxy: boolean;

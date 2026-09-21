@@ -12,6 +12,7 @@ CONTRIBUTIONS_QUERY = """
 query ContributionDashboard($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
     login
+    createdAt
     name
     avatarUrl
     url

@@ -83,7 +83,7 @@ export default function HeatmapChart({ data }: { data: ContributionDay[] }) {
     <ChartFrame
       eyebrow="Signal / 03"
       title="贡献热力图"
-      description="GitHub 风格日历矩阵，颜色越亮表示贡献越集中"
+      description={`${data[0]?.date ?? ""} — ${data[data.length - 1]?.date ?? ""} · 每格一天，颜色越亮表示贡献越集中`}
       className="lg:col-span-3"
     >
       <div className="overflow-x-auto">

@@ -8,7 +8,7 @@ import EChart from "./EChart";
 
 const COLORS = ["#28d7ff", "#5a7cff", "#8b5cf6", "#d053ff", "#2dd4bf"];
 
-export default function ActivityChart({ activity }: { activity: ActivityBreakdown }) {
+export default function ActivityChart({ activity, scope, dateRange }: { activity: ActivityBreakdown; scope?: "all" | "selected"; dateRange?: string }) {
   const entries = [
     { name: "Commits", value: activity.commits },
     { name: "Pull requests", value: activity.pull_requests },
@@ -75,8 +75,8 @@ export default function ActivityChart({ activity }: { activity: ActivityBreakdow
   return (
     <ChartFrame
       eyebrow="Signal / 02"
-      title="活动类型分布"
-      description="可见活动的构成与协作偏好 · 含创建仓库 · 圆环顺时针加载"
+      title={scope === "all" ? "活动类型分布 · 全部历史" : "活动类型分布"}
+      description={`${dateRange ?? "所选范围"} · Token 可见活动 · 含创建仓库`}
       accent="violet"
     >
       {total > 0 ? (

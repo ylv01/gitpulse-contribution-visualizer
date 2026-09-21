@@ -4,7 +4,7 @@ import { Bot, ExternalLink, HardDrive, LoaderCircle, Play, Save, ShieldCheck, Tr
 import { useEffect, useState } from "react";
 
 import { deleteAutomationToken, fetchAutomationConfig, runAutomation, saveAutomationConfig } from "@/lib/api";
-import type { Aggregation, AutomationConfig, AutomationEndMode } from "@/lib/types";
+import type { Aggregation, AutomationConfig, AutomationEndMode, ChartRange } from "@/lib/types";
 
 interface AutomationPanelProps {
   username: string;
@@ -12,6 +12,9 @@ interface AutomationPanelProps {
   startDate: string;
   endDate: string;
   aggregation: Aggregation;
+  trendRange: ChartRange | null;
+  heatmapRange: ChartRange | null;
+  activityScope: "all" | "selected";
   onLoadConfig: (config: AutomationConfig) => void;
   onTokenSaved: () => void;
   onError: (message: string) => void;
@@ -38,6 +41,9 @@ export default function AutomationPanel({
   startDate,
   endDate,
   aggregation,
+  trendRange,
+  heatmapRange,
+  activityScope,
   onLoadConfig,
   onTokenSaved,
   onError,
@@ -65,6 +71,10 @@ export default function AutomationPanel({
       start_date: startDate,
       end_date: config.end_mode === "fixed" ? endDate : null,
       aggregation,
+      trend_weeks: null,
+      trend_range: trendRange,
+      heatmap_range: heatmapRange,
+      activity_scope: activityScope,
     };
   }
 
