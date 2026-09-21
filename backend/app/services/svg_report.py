@@ -298,7 +298,7 @@ def render_contribution_svg(data: ContributionResponse) -> str:
         TREND_CARD_WIDTH,
         TOP_HEIGHT,
         "Signal / 01",
-        "贡献趋势",
+        f"贡献趋势 · 最近{data.meta.trend_weeks}周" if data.meta.trend_weeks else "贡献趋势",
         _trend_chart(data),
     )
     activity_card = _card(
@@ -307,7 +307,7 @@ def render_contribution_svg(data: ContributionResponse) -> str:
         ACTIVITY_CARD_WIDTH,
         TOP_HEIGHT,
         "Signal / 02",
-        "活动类型分布",
+        "活动类型分布 · 全部历史" if data.meta.activity_scope == "all" else "活动类型分布",
         _activity_chart(data),
         accent="#9b7cff",
         animated_status=False,

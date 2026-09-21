@@ -6,7 +6,7 @@ import type { TrendPoint } from "@/lib/types";
 import ChartFrame from "./ChartFrame";
 import EChart from "./EChart";
 
-export default function TrendChart({ data }: { data: TrendPoint[] }) {
+export default function TrendChart({ data, trendWeeks }: { data: TrendPoint[]; trendWeeks?: number | null }) {
   const option: EChartsOption = {
     animation: true,
     animationDuration: 1450,
@@ -113,8 +113,8 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
   return (
     <ChartFrame
       eyebrow="Signal / 01"
-      title="贡献趋势"
-      description="选定时间窗内的贡献强度变化 · 霓虹光泽沿时间方向持续流动"
+      title={trendWeeks ? `贡献趋势 · 最近${trendWeeks}周` : "贡献趋势"}
+      description={`${data[0]?.start_date ?? ""} — ${data[data.length - 1]?.end_date ?? ""} · 霓虹光泽沿时间方向持续流动`}
       className="lg:col-span-2"
     >
       <EChart className="trend-flow-chart export-trend-chart" option={option} height={300} />

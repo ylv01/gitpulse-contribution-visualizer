@@ -27,7 +27,8 @@ import { FormEvent, useCallback, useMemo, useState } from "react";
 
 import { fetchContributions } from "@/lib/api";
 import { exportCsv, exportReportPng, exportReportSvg } from "@/lib/export";
-import type { Aggregation, AutomationConfig, ContributionResponse } from "@/lib/types";
+import type { Aggregation, AutomationConfig, ChartRange, ContributionResponse } from "@/lib/types";
+import ChartRangeControls from "./ChartRangeControls";
 import AutomationPanel from "./AutomationPanel";
 import ActivityChart from "./charts/ActivityChart";
 import HeatmapChart from "./charts/HeatmapChart";
@@ -62,6 +63,9 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState(initialRange.start);
   const [endDate, setEndDate] = useState(initialRange.end);
   const [aggregation, setAggregation] = useState<Aggregation>("week");
+  const [trendRange, setTrendRange] = useState<ChartRange | null>({ mode: "recent", unit: "week", count: 5 });
+  const [heatmapRange, setHeatmapRange] = useState<ChartRange | null>(null);
+  const [activityScope, setActivityScope] = useState<"all" | "selected">("all");
   const [mode, setMode] = useState<"manual" | "automation">("manual");
   const [data, setData] = useState<ContributionResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +76,10 @@ export default function Dashboard() {
     setUsername(config.username);
     setStartDate(config.start_date);
     setEndDate(config.end_mode === "fixed" && config.end_date ? config.end_date : formatDate(new Date()));
-    setAggregation(config.aggregation);
+    setAggregation(config.trend_weeks ? "week" : config.aggregation);
+    setTrendRange(config.trend_range ?? (config.trend_weeks ? { mode: "recent", unit: "week", count: config.trend_weeks } : null));
+    setHeatmapRange(config.heatmap_range ?? null);
+    setActivityScope(config.activity_scope ?? "all");
   }, []);
 
   const handleAutomationError = useCallback((message: string) => setError(message), []);
@@ -92,6 +99,9 @@ export default function Dashboard() {
         start_date: startDate,
         end_date: endDate,
         aggregation,
+        trend_range: trendRange,
+        heatmap_range: heatmapRange,
+        activity_scope: activityScope,
       });
       setData(result);
     } catch (requestError) {
@@ -291,7 +301,7 @@ export default function Dashboard() {
             </label>
 
             <fieldset>
-              <legend className="field-label">Aggregation</legend>
+              <legend className="field-label">趋势聚合粒度</legend>
               <div className="grid h-11 grid-cols-3 rounded-xl border border-white/[0.08] bg-[#070a17]/90 p-1">
                 {aggregationOptions.map((option) => (
                   <button
@@ -321,6 +331,20 @@ export default function Dashboard() {
             </button>
           </div>
 
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <ChartRangeControls title="贡献趋势" value={trendRange} onChange={setTrendRange} startDate={startDate} endDate={endDate} />
+            <ChartRangeControls title="贡献热力图" value={heatmapRange} onChange={setHeatmapRange} startDate={startDate} endDate={endDate} />
+          </div>
+          <label className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+            活动类型分布
+            <select aria-label="活动类型分布统计范围" className="input-shell !w-auto" value={activityScope}
+              onChange={(event) => setActivityScope(event.target.value as "all" | "selected")}>
+              <option value="all">账号全部历史（注册至今天）</option>
+              <option value="selected">使用上方日期</option>
+            </select>
+            <span className="text-[10px] text-slate-500">仅统计 Token 可见的活动；旧账号首次查询可能稍慢。</span>
+          </label>
+
           <div className="mt-4 flex items-center gap-1.5 text-[10px] text-slate-700 sm:hidden">
             <ShieldCheck size={12} className="text-emerald-400/60" />
             {mode === "manual" ? "页面输入仅用于本次请求；留空时读取 backend/.env" : "首次配置必填；保存后写入 automation/.env.local"}
@@ -334,6 +358,9 @@ export default function Dashboard() {
             startDate={startDate}
             endDate={endDate}
             aggregation={aggregation}
+            trendRange={trendRange}
+            heatmapRange={heatmapRange}
+            activityScope={activityScope}
             onLoadConfig={handleAutomationConfigLoad}
             onTokenSaved={() => setToken("")}
             onError={handleAutomationError}
@@ -445,8 +472,8 @@ export default function Dashboard() {
 
             <div id="visual-report" className="mt-4 rounded-3xl bg-[#050714] p-1">
               <div className="grid gap-4 lg:grid-cols-3">
-                <TrendChart data={data.trend} />
-                <ActivityChart activity={data.activity} />
+                <TrendChart data={data.trend} trendWeeks={data.meta.trend_weeks} />
+                <ActivityChart activity={data.activity} scope={data.meta.activity_scope} dateRange={`${data.meta.activity_start_date ?? data.meta.start_date} — ${data.meta.activity_end_date ?? data.meta.end_date}`} />
                 <HeatmapChart data={data.daily} />
               </div>
             </div>

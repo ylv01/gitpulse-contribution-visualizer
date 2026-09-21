@@ -9,6 +9,7 @@ from ..config import Settings
 from ..github_client import GitHubClient
 from ..models import (
     ActivityBreakdown,
+    ChartRange,
     Aggregation,
     ContributionDay,
     ContributionResponse,
@@ -106,6 +107,37 @@ def aggregate_frame(frame: pd.DataFrame, aggregation: Aggregation) -> list[Trend
     return points
 
 
+def build_trend(frame: pd.DataFrame, aggregation: Aggregation, trend_weeks: int | None = None) -> list[TrendPoint]:
+    """Limit only the trend to recent Monday-Sunday weeks ending at the query end."""
+    if frame.empty:
+        return []
+    if trend_weeks is None:
+        return aggregate_frame(frame, aggregation)
+    if not 1 <= trend_weeks <= 52:
+        raise ValueError("趋势周数必须在 1 到 52 之间")
+    end_date = pd.Timestamp(frame["date"].max()).date()
+    first_monday = end_date - timedelta(days=end_date.weekday() + 7 * (trend_weeks - 1))
+    # Keep the original frame intact for the heatmap, metrics and activity totals.
+    recent = frame.loc[pd.to_datetime(frame["date"]).dt.date >= first_monday]
+    return aggregate_frame(recent, "week")
+
+
+def resolve_chart_range(selection: ChartRange | None, start: date, end: date) -> tuple[date, date]:
+    if selection is None:
+        return start, end
+    if selection.mode == "custom":
+        assert selection.start_date is not None and selection.end_date is not None
+        return selection.start_date, selection.end_date
+    if selection.unit == "day":
+        first = end - timedelta(days=selection.count - 1)
+    elif selection.unit == "week":
+        first = end - timedelta(days=end.weekday() + 7 * (selection.count - 1))
+    else:
+        month_index = end.year * 12 + end.month - selection.count
+        first = date(month_index // 12, month_index % 12 + 1, 1)
+    return first, end
+
+
 async def get_contributions(
     settings: Settings,
     username: str,
@@ -113,23 +145,49 @@ async def get_contributions(
     end_date: date,
     aggregation: Aggregation,
     token: str | None,
+    trend_weeks: int | None = None,
+    trend_range: ChartRange | None = None,
+    heatmap_range: ChartRange | None = None,
+    activity_scope: str = "all",
 ) -> ContributionResponse:
-    users: list[dict[str, Any]] = []
+    trend_start, trend_end = resolve_chart_range(trend_range, start_date, end_date)
+    heatmap_start, heatmap_end = resolve_chart_range(heatmap_range, start_date, end_date)
     async with GitHubClient(settings, token) as client:
-        for chunk_start, chunk_end in iter_date_chunks(start_date, end_date):
-            users.append(await client.fetch_period(username, chunk_start, chunk_end))
+        cache: dict[tuple[date, date], dict[str, Any]] = {}
 
-    frame = build_daily_frame(users, start_date, end_date)
+        async def fetch_range(first: date, last: date) -> list[dict[str, Any]]:
+            result = []
+            for chunk_start, chunk_end in iter_date_chunks(first, last):
+                key = (chunk_start, chunk_end)
+                if key not in cache:
+                    cache[key] = await client.fetch_period(username, chunk_start, chunk_end)
+                result.append(cache[key])
+            return result
+
+        users = await fetch_range(heatmap_start, heatmap_end)
+        trend_users = await fetch_range(trend_start, trend_end)
+        first_user = users[0]
+        activity_start, activity_end = start_date, end_date
+        if activity_scope == "all":
+            activity_start = date.fromisoformat(first_user["createdAt"][:10])
+            activity_end = date.today()
+        activity_users = await fetch_range(activity_start, activity_end)
+
+    frame = build_daily_frame(users, heatmap_start, heatmap_end)
+    trend_frame = build_daily_frame(trend_users, trend_start, trend_end)
+    effective_weeks = trend_weeks if trend_range is None else None
+    trend = build_trend(trend_frame, aggregation, effective_weeks)
     activity = ActivityBreakdown()
-    restricted = 0
-    for user in users:
+    restricted = sum(int(u["contributionsCollection"].get("restrictedContributionsCount", 0)) for u in users)
+    activity_restricted = 0
+    for user in activity_users:
         collection = user["contributionsCollection"]
         activity.commits += int(collection.get("totalCommitContributions", 0))
         activity.pull_requests += int(collection.get("totalPullRequestContributions", 0))
         activity.issues += int(collection.get("totalIssueContributions", 0))
         activity.code_reviews += int(collection.get("totalPullRequestReviewContributions", 0))
         activity.repositories += int(collection.get("totalRepositoryContributions", 0))
-        restricted += int(collection.get("restrictedContributionsCount", 0))
+        activity_restricted += int(collection.get("restrictedContributionsCount", 0))
 
     first_user = users[0]
     counts = [int(value) for value in frame["count"].tolist()]
@@ -150,12 +208,19 @@ async def get_contributions(
             profile_url=first_user["url"],
         ),
         daily=daily,
-        trend=aggregate_frame(frame, aggregation),
+        trend=trend,
         activity=activity,
         meta=QueryMeta(
-            start_date=start_date,
-            end_date=end_date,
-            aggregation=aggregation,
+            start_date=heatmap_start,
+            end_date=heatmap_end,
+            aggregation="week" if effective_weeks is not None else aggregation,
+            trend_weeks=effective_weeks,
+            trend_start_date=trend[0].start_date,
+            trend_end_date=trend[-1].end_date,
+            activity_start_date=activity_start,
+            activity_end_date=activity_end,
+            activity_scope=activity_scope,
+            activity_restricted_contributions=activity_restricted,
             total_contributions=sum(counts),
             active_days=sum(count > 0 for count in counts),
             longest_streak=_longest_streak(counts),

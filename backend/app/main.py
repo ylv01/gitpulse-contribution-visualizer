@@ -55,6 +55,10 @@ async def contributions(request: ContributionRequest) -> ContributionResponse:
             end_date=request.end_date,
             aggregation=request.aggregation,
             token=request.token.get_secret_value() if request.token else None,
+            trend_weeks=request.trend_weeks,
+            trend_range=request.trend_range,
+            heatmap_range=request.heatmap_range,
+            activity_scope=request.activity_scope,
         )
     except GitHubAPIError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc

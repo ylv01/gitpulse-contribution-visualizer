@@ -8,12 +8,38 @@ Aggregation = Literal["day", "week", "month"]
 DateEndMode = Literal["today", "fixed"]
 
 
-class ContributionRequest(BaseModel):
+class ChartRange(BaseModel):
+    mode: Literal["recent", "custom"] = "recent"
+    unit: Aggregation = "week"
+    count: int = Field(default=5, ge=1, le=3653)
+    start_date: date | None = None
+    end_date: date | None = None
+
+    @model_validator(mode="after")
+    def validate_range(self) -> "ChartRange":
+        if self.mode == "custom":
+            if self.start_date is None or self.end_date is None:
+                raise ValueError("自定义图表范围必须填写开始和结束日期")
+            if self.start_date > self.end_date or (self.end_date - self.start_date).days > 3653:
+                raise ValueError("图表日期范围无效，最多支持 10 年")
+        elif self.count > {"day": 3653, "week": 521, "month": 120}[self.unit]:
+            raise ValueError("图表最近范围最多支持 10 年")
+        return self
+
+
+class ChartOptions(BaseModel):
+    trend_range: ChartRange | None = None
+    heatmap_range: ChartRange | None = None
+    activity_scope: Literal["all", "selected"] = "all"
+
+
+class ContributionRequest(ChartOptions):
     username: str = Field(min_length=1, max_length=39, pattern=r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$")
     token: SecretStr | None = None
     start_date: date
     end_date: date
     aggregation: Aggregation = "day"
+    trend_weeks: int | None = Field(default=None, ge=1, le=52)
 
     @model_validator(mode="after")
     def validate_date_range(self) -> "ContributionRequest":
@@ -57,10 +83,17 @@ class QueryMeta(BaseModel):
     start_date: date
     end_date: date
     aggregation: Aggregation
+    trend_weeks: int | None = None
     total_contributions: int
     active_days: int
     longest_streak: int
     restricted_contributions: int
+    trend_start_date: date | None = None
+    trend_end_date: date | None = None
+    activity_start_date: date | None = None
+    activity_end_date: date | None = None
+    activity_scope: Literal["all", "selected"] = "selected"
+    activity_restricted_contributions: int = 0
 
 
 class ContributionResponse(BaseModel):
@@ -71,13 +104,14 @@ class ContributionResponse(BaseModel):
     meta: QueryMeta
 
 
-class AutomationConfig(BaseModel):
+class AutomationConfig(ChartOptions):
     enabled: bool = False
     username: str = Field(default="ylv01", min_length=1, max_length=39, pattern=r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$")
     start_date: date = date(2026, 6, 1)
     end_mode: DateEndMode = "today"
     end_date: date | None = None
     aggregation: Aggregation = "month"
+    trend_weeks: int | None = Field(default=None, ge=1, le=52)
     schedule_time: str = Field(default="09:00", pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
     time_zone: str = "Asia/Shanghai"
     require_proxy: bool = True

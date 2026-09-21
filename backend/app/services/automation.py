@@ -79,6 +79,10 @@ async def run_automation(settings: Settings, push: bool) -> AutomationRunRespons
         end_date=end_date,
         aggregation=config.aggregation,
         token=token,
+        trend_weeks=config.trend_weeks,
+        trend_range=config.trend_range,
+        heatmap_range=config.heatmap_range,
+        activity_scope=config.activity_scope,
     )
     svg = render_contribution_svg(data)
 

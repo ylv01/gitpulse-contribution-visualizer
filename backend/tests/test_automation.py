@@ -24,6 +24,17 @@ def test_automation_config_rejects_unsafe_target_path() -> None:
         AutomationConfig(target_path="../secret.svg")
 
 
+def test_trend_window_config_round_trip_and_validation() -> None:
+    config = AutomationConfig(start_date=date(2026, 4, 1), aggregation="week", trend_weeks=5)
+    restored = AutomationConfig.model_validate_json(config.model_dump_json())
+    assert restored.trend_weeks == 5
+    assert restored.start_date == date(2026, 4, 1)
+    assert AutomationConfig().trend_weeks is None
+    for invalid in [0, -1, 53]:
+        with pytest.raises(ValidationError):
+            AutomationConfig(trend_weeks=invalid)
+
+
 def test_automation_secret_is_stored_separately(tmp_path, monkeypatch) -> None:
     config_path = tmp_path / "config.local.json"
     token_path = tmp_path / ".env.local"
@@ -80,6 +91,9 @@ def test_svg_report_contains_native_animations() -> None:
     assert api_response.status_code == 200
     assert api_response.headers["content-type"].startswith("image/svg+xml")
     assert api_response.text == svg
+
+    response.meta.trend_weeks = 5
+    assert "贡献趋势 · 最近5周" in render_contribution_svg(response)
 
     response.activity = ActivityBreakdown(repositories=3)
     repository_only = render_contribution_svg(response)

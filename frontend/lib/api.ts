@@ -40,8 +40,9 @@ export async function fetchContributionSvg(data: ContributionResponse): Promise<
   if (!response.ok) {
     let message = `SVG 生成失败（${response.status}）`;
     try {
-      const payload = (await response.json()) as { detail?: string };
-      if (payload.detail) message = payload.detail;
+      const payload = (await response.json()) as { detail?: string | Array<{ msg?: string }> };
+      if (typeof payload.detail === "string") message = payload.detail;
+      if (Array.isArray(payload.detail)) message = payload.detail.map((item) => item.msg).filter(Boolean).join("；");
     } catch {
       // Keep the status fallback.
     }
@@ -55,8 +56,9 @@ async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     let message = `请求失败（${response.status}）`;
     try {
-      const payload = (await response.json()) as { detail?: string };
-      if (payload.detail) message = payload.detail;
+      const payload = (await response.json()) as { detail?: string | Array<{ msg?: string }> };
+      if (typeof payload.detail === "string") message = payload.detail;
+      if (Array.isArray(payload.detail)) message = payload.detail.map((item) => item.msg).filter(Boolean).join("；");
     } catch {
       // Keep the status fallback.
     }
